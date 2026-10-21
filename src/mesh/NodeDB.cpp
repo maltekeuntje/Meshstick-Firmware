@@ -1043,7 +1043,11 @@ void NodeDB::installDefaultConfig(bool preserveKey = false)
     config.lora.sx126x_rx_boosted_gain = true;
     config.lora.tx_enabled =
         true; // FIXME: maybe false in the future, and setting region to enable it. (unset region forces it off)
+#ifdef USERPREFS_LORACONFIG_OVERRIDE_DUTY_CYCLE
+    config.lora.override_duty_cycle = USERPREFS_LORACONFIG_OVERRIDE_DUTY_CYCLE;
+#else
     config.lora.override_duty_cycle = false;
+#endif
     config.lora.config_ok_to_mqtt = false;
 #if HAS_LORA_FEM
     config.lora.fem_lna_mode = meshtastic_Config_LoRaConfig_FEM_LNA_Mode_ENABLED;
