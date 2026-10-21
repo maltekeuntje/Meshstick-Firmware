@@ -151,7 +151,7 @@ jobs:
 
       - name: Build the MSI and winget manifests
         shell: pwsh
-        run: ./bin/build-winget-package.ps1 -ReleaseTag "v$env:LONG_VERSION" -Validate
+        run: ./bin/build-winget-package.ps1 -ReleaseTag "v$env:LONG_VERSION" -SampleConfigPath packaging/windows/config-meshstick.yaml -Validate
         env:
           LONG_VERSION: ${{ steps.version.outputs.long }}
 
