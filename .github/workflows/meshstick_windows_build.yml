@@ -1,0 +1,19 @@
+name: Meshstick Windows Build
+
+# Builds meshtasticd.exe and the MSI installer for Windows from this branch,
+# reusing the upstream build_windows_bin.yml workflow. Runs on every push to
+# this branch and can be started by hand from the Actions tab.
+on:
+  push:
+    branches:
+      - meshstick/windows-build
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows:
+    uses: ./.github/workflows/build_windows_bin.yml
+    with:
+      windows_ver: "2025"
