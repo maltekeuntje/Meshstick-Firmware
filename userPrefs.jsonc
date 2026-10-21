@@ -131,5 +131,6 @@
   "USERPREFS_LORACONFIG_OVERRIDE_DUTY_CYCLE": "true",
   "USERPREFS_CONFIG_OWNER_LONG_NAME": "Laptop-Terminal",
   "USERPREFS_CONFIG_OWNER_SHORT_NAME": "LT",
+  "USERPREFS_CONFIG_OWNER_NAME_LOCKED": "1",
   "USERPREFS_TZ_STRING": "tzplaceholder                                         "
 }

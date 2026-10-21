@@ -515,6 +515,16 @@ NodeDB::NodeDB()
     memcpy(owner.macaddr, ourMacAddr, sizeof(owner.macaddr));
     // Ensure owner.id is always derived from the node number
     snprintf(owner.id, sizeof(owner.id), "!%08x", getNodeNum());
+#if defined(USERPREFS_CONFIG_OWNER_NAME_LOCKED) && USERPREFS_CONFIG_OWNER_NAME_LOCKED
+    // Re-apply the vendor owner names on every boot, not only on first boot or factory reset
+#ifdef USERPREFS_CONFIG_OWNER_LONG_NAME
+    snprintf(owner.long_name, sizeof(owner.long_name), (const char *)USERPREFS_CONFIG_OWNER_LONG_NAME);
+    clampLongName(owner.long_name);
+#endif
+#ifdef USERPREFS_CONFIG_OWNER_SHORT_NAME
+    snprintf(owner.short_name, sizeof(owner.short_name), (const char *)USERPREFS_CONFIG_OWNER_SHORT_NAME);
+#endif
+#endif
 
     if (!config.has_security) {
         config.has_security = true;
