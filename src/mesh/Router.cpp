@@ -943,6 +943,7 @@ DecodeState perhapsDecode(meshtastic_MeshPacket *p)
     }
     bool decrypted = false;
     bool pkiAttempted = false;
+    bool pkiNoSenderKey = false; // PKI DM to us from a sender whose public key we don't have yet
     bool licensedPkiCandidate = false;
     bool matchedChannel = false;
     ChannelIndex chIndex = 0;
@@ -970,6 +971,7 @@ DecodeState perhapsDecode(meshtastic_MeshPacket *p)
             havePendingKey = crypto->getPendingPublicKey(p->from, remotePublic);
             haveRemoteKey = havePendingKey;
         }
+        pkiNoSenderKey = !haveRemoteKey;
         // Try the sender's known key first, then each configured admin key so an authorized admin can
         // reach a node that has not yet learned their key. AES-CCM AEAD rejects wrong candidates.
         bool viaAdminKey = false;
@@ -1073,7 +1075,7 @@ DecodeState perhapsDecode(meshtastic_MeshPacket *p)
                     LOG_DEBUG("Invalid protobufs in received mesh packet id=0x%08x (bad psk?)", p->id);
                 } else if (decodedtmp.portnum == meshtastic_PortNum_UNKNOWN_APP) {
                     LOG_DEBUG("Invalid portnum (bad psk?)");
-#if !(MESHTASTIC_EXCLUDE_PKI)
+#if !(MESHTASTIC_EXCLUDE_PKI) && !(defined(USERPREFS_ACCEPT_LEGACY_DM) && USERPREFS_ACCEPT_LEGACY_DM)
                 } else if (!owner.is_licensed && isToUs(p) && decodedtmp.portnum == meshtastic_PortNum_TEXT_MESSAGE_APP) {
                     LOG_WARN("Rejecting legacy DM");
                     return DecodeState::DECODE_FAILURE;
@@ -1160,6 +1162,14 @@ DecodeState perhapsDecode(meshtastic_MeshPacket *p)
         return DecodeState::DECODE_SUCCESS;
     } else {
         LOG_WARN("No channel found for decoding, hash 0x%x", p->channel);
+#if defined(USERPREFS_FORWARD_UNDECRYPTABLE_PKI_DM) && USERPREFS_FORWARD_UNDECRYPTABLE_PKI_DM
+        // Hand a PKI DM we lack the sender's key for to the client as an opaque packet: the client
+        // can decrypt it later with our private key once the sender's NodeInfo arrives.
+        if (pkiNoSenderKey) {
+            LOG_INFO("PKI DM from 0x%08x without a known key, forward encrypted to the client", p->from);
+            return DecodeState::DECODE_OPAQUE;
+        }
+#endif
         return (matchedChannel || pkiAttempted || licensedPkiCandidate) ? DecodeState::DECODE_FAILURE
                                                                         : DecodeState::DECODE_OPAQUE;
     }
